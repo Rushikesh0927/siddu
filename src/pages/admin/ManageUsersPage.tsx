@@ -43,7 +43,7 @@ const ManageUsersPage = () => {
   const [users, setUsers] = useState<UserDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>("ALL");
   const [selectedUser, setSelectedUser] = useState<UserDetails | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [userJobs, setUserJobs] = useState<any[]>([]);
@@ -140,10 +140,10 @@ const ManageUsersPage = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-      (user.email?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
-    const matchesRole = !selectedRole || user.role === selectedRole;
+    const matchesSearch =
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesRole = selectedRole === "ALL" || user.role === selectedRole;
     return matchesSearch && matchesRole;
   });
 
@@ -195,7 +195,7 @@ const ManageUsersPage = () => {
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Roles</SelectItem>
+                <SelectItem value="ALL">All Roles</SelectItem>
                 <SelectItem value={UserRole.STUDENT}>Students</SelectItem>
                 <SelectItem value={UserRole.EMPLOYER}>Employers</SelectItem>
                 <SelectItem value={UserRole.ADMIN}>Admins</SelectItem>

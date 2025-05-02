@@ -52,7 +52,7 @@ const AdminManageJobsPage = () => {
   const [jobs, setJobs] = useState<JobDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [selectedJob, setSelectedJob] = useState<JobDetails | null>(null);
 
   useEffect(() => {
@@ -76,8 +76,8 @@ const AdminManageJobsPage = () => {
           created_at,
           employer:employer_id (
             id,
-            name:profiles(name),
-            email:auth.users!id(email)
+            name,
+            email
           ),
           applications:applications(count)
         `)
@@ -97,9 +97,9 @@ const AdminManageJobsPage = () => {
         status: job.status,
         created_at: job.created_at,
         employer: {
-          id: job.employer.id,
-          name: job.employer.name?.[0]?.name || "Unknown",
-          email: job.employer.email?.[0]?.email
+          id: job.employer?.id || "",
+          name: job.employer?.name || "Unknown",
+          email: job.employer?.email || ""
         },
         application_count: job.applications?.[0]?.count || 0
       }));
@@ -158,7 +158,7 @@ const AdminManageJobsPage = () => {
       job.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.employer.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = !selectedStatus || job.status === selectedStatus;
+    const matchesStatus = selectedStatus === "ALL" || job.status === selectedStatus;
     
     return matchesSearch && matchesStatus;
   });
@@ -184,7 +184,7 @@ const AdminManageJobsPage = () => {
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="ALL">All Statuses</SelectItem>
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="INACTIVE">Inactive</SelectItem>
                 <SelectItem value="HOLD">On Hold</SelectItem>
