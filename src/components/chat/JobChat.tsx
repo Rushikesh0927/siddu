@@ -70,6 +70,7 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
     const { error } = await supabase.from("messages").insert({
       job_id: jobId,
       sender_id: user.id,
+      sender_name: user.name,
       receiver_id: user.role === "student" ? undefined : studentId,
       content: input,
     });
@@ -91,6 +92,7 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
         const { error: insertError } = await supabase.from("messages").insert({
           job_id: jobId,
           sender_id: user.id,
+          sender_name: user.name,
           receiver_id: user.role === "student" ? undefined : studentId,
           image_url: data.publicUrl
         });
