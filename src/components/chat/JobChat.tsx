@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface JobChatProps {
   jobId: string;
@@ -15,7 +15,6 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
   const [jobStatus, setJobStatus] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   // Fetch job status to hide chat if finished
   useEffect(() => {
@@ -114,32 +113,53 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
   }
 
   return (
-    <div className="border rounded p-4 max-w-md mx-auto bg-white dark:bg-gray-900">
-      {error && <div className="text-red-500 mb-2">{error}</div>}
-      <div className="h-64 overflow-y-auto mb-2 bg-gray-50 dark:bg-gray-800 p-2 rounded">
-        {messages.map((msg, idx) => (
-          <div key={msg.id || idx} className="mb-1">
-            <span className="font-semibold">{msg.sender_id === user.id ? "You" : "Other"}:</span>
-            {msg.image_url ? (
-              <img src={msg.image_url} alt="chat-img" className="max-w-xs max-h-48 rounded my-2" />
-            ) : (
-              <span>{msg.content}</span>
-            )}
-            <span className="text-xs text-gray-400 ml-2">{msg.created_at ? new Date(msg.created_at).toLocaleTimeString() : ""}</span>
-          </div>
-        ))}
+    <div className="flex flex-col h-full w-full">
+      {error && <div className="text-red-500 mb-2 text-center">{error}</div>}
+      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 bg-gray-50 dark:bg-gray-800">
+        {messages.map((msg, idx) => {
+          const isMe = msg.sender_id === user.id;
+          return (
+            <div key={msg.id || idx} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+              {!isMe && (
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>{msg.sender_name ? msg.sender_name[0].toUpperCase() : 'U'}</AvatarFallback>
+                </Avatar>
+              )}
+              <div className={`max-w-xs rounded-2xl px-4 py-2 shadow-md ${isMe ? 'bg-gradient-to-br from-job-600 to-brand-500 text-white rounded-br-none' : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none'}`}>
+                {msg.image_url ? (
+                  <img src={msg.image_url} alt="chat-img" className="max-w-xs max-h-48 rounded mb-1" />
+                ) : (
+                  <span>{msg.content}</span>
+                )}
+                <div className="text-xs text-gray-400 mt-1 text-right">
+                  {msg.created_at ? new Date(msg.created_at).toLocaleTimeString() : ""}
+                </div>
+              </div>
+              {isMe && (
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>{user.name ? user.name[0].toUpperCase() : 'U'}</AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
-      <div className="flex gap-2">
+      <div className="border-t bg-white dark:bg-gray-900 px-4 py-3 flex items-center gap-2 sticky bottom-0">
         <input
-          className="flex-1 border rounded px-2 py-1"
+          className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-job-600"
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && sendMessage()}
           placeholder="Type a message..."
         />
-        <input type="file" accept="image/*" onChange={handleFileChange} disabled={uploading} />
-        <button className="bg-blue-500 text-white px-4 py-1 rounded" onClick={sendMessage}>
+        <input type="file" accept="image/*" onChange={handleFileChange} disabled={uploading} className="hidden" id="chat-image-upload" />
+        <label htmlFor="chat-image-upload" className="cursor-pointer px-2 py-1 text-job-600 hover:text-brand-500">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5V6.75A2.25 2.25 0 015.25 4.5h13.5A2.25 2.25 0 0121 6.75v10.5m-18 0A2.25 2.25 0 005.25 19.5h13.5A2.25 2.25 0 0021 16.5m-18 0v-1.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 15v1.5m-9-6.75h.008v.008H12v-.008zm0 0a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" />
+          </svg>
+        </label>
+        <button className="bg-job-600 hover:bg-brand-500 text-white px-4 py-2 rounded-full transition" onClick={sendMessage}>
           Send
         </button>
       </div>
