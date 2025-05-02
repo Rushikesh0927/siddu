@@ -46,7 +46,7 @@ const ManageJobsPage = () => {
   const [jobs, setJobs] = useState<JobDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -152,13 +152,11 @@ const ManageJobsPage = () => {
   };
 
   const filteredJobs = jobs.filter(job => {
-    const matchesSearch = 
+    const matchesSearch =
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = !selectedStatus || job.status === selectedStatus;
-    
+    const matchesStatus = selectedStatus === "ALL" || job.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -190,7 +188,7 @@ const ManageJobsPage = () => {
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="ALL">All Statuses</SelectItem>
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="INACTIVE">Inactive</SelectItem>
                 <SelectItem value="HOLD">On Hold</SelectItem>
