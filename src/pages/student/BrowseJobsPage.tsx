@@ -26,7 +26,7 @@ const BrowseJobsPage = () => {
   const [jobs, setJobs] = useState<JobProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [jobType, setJobType] = useState<string | null>(null);
+  const [jobType, setJobType] = useState<string>("ALL");
   const [hasApplied, setHasApplied] = useState<{[key: string]: boolean}>({});
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -104,13 +104,11 @@ const BrowseJobsPage = () => {
   };
 
   const filteredJobs = jobs.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesType = !jobType || job.type === jobType;
-    
+    const matchesSearch =
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesType = jobType === "ALL" || job.type === jobType;
     return matchesSearch && matchesType;
   });
 
@@ -131,12 +129,12 @@ const BrowseJobsPage = () => {
               />
             </div>
             <div className="w-full sm:w-48">
-              <Select value={jobType || ""} onValueChange={setJobType}>
+              <Select value={jobType} onValueChange={setJobType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Job Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="ALL">All Types</SelectItem>
                   <SelectItem value="Full-time">Full-time</SelectItem>
                   <SelectItem value="Part-time">Part-time</SelectItem>
                   <SelectItem value="Internship">Internship</SelectItem>
@@ -146,7 +144,7 @@ const BrowseJobsPage = () => {
             </div>
             <Button variant="outline" onClick={() => {
               setSearchTerm("");
-              setJobType(null);
+              setJobType("ALL");
             }}>
               Reset
             </Button>
@@ -215,7 +213,7 @@ const BrowseJobsPage = () => {
                 <p className="text-gray-500">No jobs found matching your criteria.</p>
                 <Button variant="link" onClick={() => {
                   setSearchTerm("");
-                  setJobType(null);
+                  setJobType("ALL");
                 }}>
                   Reset filters
                 </Button>
