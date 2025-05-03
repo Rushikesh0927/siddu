@@ -50,7 +50,11 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `job_id=eq.${jobId}` },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new]);
+          // Only add if not already present (avoid duplicates)
+          setMessages((prev) => {
+            if (prev.some(m => m.id === payload.new.id)) return prev;
+            return [...prev, payload.new];
+          });
         }
       )
       .subscribe();
@@ -74,7 +78,10 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
       receiver_id: user.role === "student" ? undefined : studentId,
       content: input,
     });
-    if (error) setError("Failed to send message");
+    if (error) {
+      setError("Failed to send message");
+      console.error("Supabase message insert error:", error);
+    }
     setInput("");
   };
 
@@ -96,7 +103,10 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
           receiver_id: user.role === "student" ? undefined : studentId,
           image_url: data.publicUrl
         });
-        if (insertError) setError("Failed to send image message");
+        if (insertError) {
+          setError("Failed to send image message");
+          console.error("Supabase image message insert error:", insertError);
+        }
       } else {
         setError("Failed to get image URL");
       }
