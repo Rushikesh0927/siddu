@@ -15,16 +15,20 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
   const [jobStatus, setJobStatus] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [employerId, setEmployerId] = useState<string | null>(null);
 
-  // Fetch job status to hide chat if finished
+  // Fetch job status and employerId to hide chat if finished and get employerId
   useEffect(() => {
     if (!jobId) return;
     supabase
       .from("jobs")
-      .select("status")
+      .select("status, employer_id")
       .eq("id", jobId)
       .single()
-      .then(({ data }) => setJobStatus(data?.status || null));
+      .then(({ data }) => {
+        setJobStatus(data?.status || null);
+        setEmployerId(data?.employer_id || null);
+      });
   }, [jobId]);
 
   // Fetch chat history
@@ -71,11 +75,22 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
   const sendMessage = async () => {
     if (!input.trim()) return;
     setError(null);
+    // Determine receiver_id
+    let receiver_id = null;
+    if (user.role === "student") {
+      receiver_id = employerId;
+    } else {
+      receiver_id = studentId;
+    }
+    if (!receiver_id) {
+      setError("Receiver not found");
+      return;
+    }
     const { error } = await supabase.from("messages").insert({
       job_id: jobId,
       sender_id: user.id,
       sender_name: user.name,
-      receiver_id: user.role === "student" ? undefined : studentId,
+      receiver_id,
       content: input,
     });
     if (error) {
@@ -96,11 +111,23 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
     if (!uploadError) {
       const { data } = supabase.storage.from('task-files').getPublicUrl(filePath);
       if (data?.publicUrl) {
+        // Determine receiver_id
+        let receiver_id = null;
+        if (user.role === "student") {
+          receiver_id = employerId;
+        } else {
+          receiver_id = studentId;
+        }
+        if (!receiver_id) {
+          setError("Receiver not found");
+          setUploading(false);
+          return;
+        }
         const { error: insertError } = await supabase.from("messages").insert({
           job_id: jobId,
           sender_id: user.id,
           sender_name: user.name,
-          receiver_id: user.role === "student" ? undefined : studentId,
+          receiver_id,
           image_url: data.publicUrl
         });
         if (insertError) {
