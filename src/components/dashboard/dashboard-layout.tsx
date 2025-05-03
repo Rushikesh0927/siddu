@@ -204,7 +204,19 @@ export const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) =>
               <Button size="icon" variant="ghost" onClick={() => toast.info("No new notifications")}>
                 <Bell className="h-5 w-5" />
               </Button>
-              <div className="w-8 h-8 bg-job-100 dark:bg-job-800 rounded-full flex items-center justify-center text-job-600 dark:text-job-300">
+              <div
+                className="w-8 h-8 bg-job-100 dark:bg-job-800 rounded-full flex items-center justify-center text-job-600 dark:text-job-300 cursor-pointer border-2 border-transparent hover:border-job-600 transition"
+                onClick={() => {
+                  if (userRole === UserRole.STUDENT) {
+                    navigate("/student-dashboard/profile");
+                  } else if (userRole === UserRole.EMPLOYER) {
+                    navigate("/employer-dashboard/profile");
+                  } else if (userRole === UserRole.ADMIN) {
+                    navigate("/admin-dashboard/settings");
+                  }
+                }}
+                title="View Profile"
+              >
                 {userRole === UserRole.STUDENT ? "S" : userRole === UserRole.EMPLOYER ? "E" : "A"}
               </div>
             </div>

@@ -86,16 +86,18 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
       setError("Receiver not found");
       return;
     }
-    const { error } = await supabase.from("messages").insert({
+    const { data, error } = await supabase.from("messages").insert({
       job_id: jobId,
       sender_id: user.id,
       sender_name: user.name,
       receiver_id,
       content: input,
-    });
+    }).select().single();
     if (error) {
       setError("Failed to send message");
       console.error("Supabase message insert error:", error);
+    } else if (data) {
+      setMessages((prev) => [...prev, data]);
     }
     setInput("");
   };
@@ -123,16 +125,18 @@ const JobChat = ({ jobId, studentId, user }: JobChatProps) => {
           setUploading(false);
           return;
         }
-        const { error: insertError } = await supabase.from("messages").insert({
+        const { data: inserted, error: insertError } = await supabase.from("messages").insert({
           job_id: jobId,
           sender_id: user.id,
           sender_name: user.name,
           receiver_id,
           image_url: data.publicUrl
-        });
+        }).select().single();
         if (insertError) {
           setError("Failed to send image message");
           console.error("Supabase image message insert error:", insertError);
+        } else if (inserted) {
+          setMessages((prev) => [...prev, inserted]);
         }
       } else {
         setError("Failed to get image URL");
