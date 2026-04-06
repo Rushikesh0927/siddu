@@ -62,15 +62,7 @@ const AdminLoginPage = () => {
       if (profileError) throw profileError;
       
       // If not admin, show error
-      if (profileData.role !== "ADMIN") {
-        await supabase.auth.signOut();
-        throw new Error("You do not have admin access");
-      }
-      
-      // Update auth context
-      login(authData.user, authData.session);
-      
-      // Redirect to admin dashboard
+Remove the client-side role check from this component. Instead, ensure that all admin-specific routes and API endpoints are protected by server-side authorization middleware or policies that verify the user's role. The client should not be responsible for making authorization decisions.
       toast.success("Logged in successfully");
       navigate("/admin-dashboard");
     } catch (error: any) {
